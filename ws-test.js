@@ -1,18 +1,14 @@
 var WebSocketServer  = require('websocket').server
 var http = require('http');
 
-var args = { /* defaults */
-    port: '8000',
-    debug: false
-};
 
 var readVoltage = 0;
 var pingCount = 0;
 
 
 
-var port = parseInt(args.port, 10);
-var debug = args.debug;
+var port = parseInt(process.env.PORT || 8000)
+var debug = false
 
 console.log('WebSocket-Node: echo-server');
 
