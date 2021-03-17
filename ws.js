@@ -28,7 +28,7 @@ var server = http.createServer(function(request, response) {
     response.end(JSON.stringify({voltage: readVoltage}));
 });
 
-server.listen(port, function() {
+server.listen(process.env.PORT || port, function() {
     console.log((new Date()) + ' Server is listening on port ' + port);
 });
 
