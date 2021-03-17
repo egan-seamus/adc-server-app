@@ -26,6 +26,7 @@ var server = http.createServer(function(request, response) {
 
 server.listen(port, function() {
     console.log((new Date()) + ' Server is listening on port ' + port);
+    console.log(server.address())
 });
 
 var wsServer = new WebSocketServer({
