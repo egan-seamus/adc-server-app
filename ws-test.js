@@ -41,7 +41,7 @@ function authorize(credentials) {
 
     // Check if we have previously stored a token.
     fs.readFile(TOKEN_PATH, (err, token) => {
-        if (err) console.error(err)
+        if (err) console.log(err)
         oAuth2Client.setCredentials(JSON.parse(token));
         setValue();
     });
@@ -68,7 +68,7 @@ function setValue() {
         console.log("success");
     })
         .catch((err) => {
-            console.error(err)
+            console.log(err)
         })
 }
 
@@ -102,9 +102,9 @@ function writeNextValue() {
           }, (err, response) => {
             if (err) {
               // Handle error
-              console.log(err);
+            //   console.log(err);
             } else {
-              console.log(response)
+            //   console.log(response)
             }
           });
 
@@ -122,7 +122,7 @@ function writeNextValue() {
                 console.log("response");
             })
             .catch((err) => {
-                console.error(err)
+                console.log(err)
             })
         writeValues = []
     }
@@ -214,7 +214,7 @@ wsServer.on('connect', function (connection) {
     }
     function sendCallback(err) {
         if (err) {
-            console.error('send() error: ' + err);
+            console.log('send() error: ' + err);
             connection.drop();
             setTimeout(function () {
                 process.exit(100);
