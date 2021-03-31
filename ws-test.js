@@ -239,7 +239,6 @@ wsServer.on('connect', function (connection) {
         }
     });
     connection.on('close', function (reasonCode, description) {
-        if (debug) { console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.'); }
-        connection._debug.printOutput();
+        console.log("closed connectoin with reason", reasonCode, description)
     });
 });
