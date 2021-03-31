@@ -10,6 +10,9 @@ let writeValues = [
 
 ]
 
+let startTime;
+let currentSpreadsheetId;
+
 var oAuth2Client;
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -72,22 +75,46 @@ function setValue() {
 function writeNextValue() {
     console.log(pingCount)
     if (pingCount % 1002 !== 0) {
-        const now = new Date(Date.now());
-        const mDatetime = "" + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() + "." + now.getMilliseconds();
+        const now = Date.now();
+        const elapsedTime = now - startTime;
+        // const mDatetime = "" + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds() + "." + now.getMilliseconds();
         writeValues.push([
-            mDatetime, readVoltage
+            elapsedTime, readVoltage
         ])
 
     }
     else {
-        
         const sheets = google.sheets({ version: 'v4', auth: oAuth2Client });
+
+        // add rows to the sheet to handle our new data
+        const batchUpdateRequest = { requests: [
+            {
+              "appendDimension": {
+                "sheetId": 0,
+                "dimension": "ROWS",
+                "length": 1000
+              }
+            }
+          ] };
+          sheets.spreadsheets.batchUpdate({
+            spreadsheetId: currentSpreadsheetId,
+            resource: batchUpdateRequest,
+          }, (err, response) => {
+            if (err) {
+              // Handle error
+              console.log(err);
+            } else {
+              console.log(response)
+            }
+          });
+
+        
         const body = {
             values: writeValues
         }
         sheets.spreadsheets.values.update({
-            spreadsheetId: '11YpQkBejAM4sAYFwxafj73fAXqPPY14F_vZnpmR1hlI',
-            range: 'A' + (pingCount - 1000)+ ':B' + pingCount,
+            spreadsheetId: currentSpreadsheetId,
+            range: 'A' + (pingCount - 1000) + ':B' + pingCount,
             valueInputOption: "USER_ENTERED",
             resource: body
         })
@@ -99,6 +126,48 @@ function writeNextValue() {
             })
         writeValues = []
     }
+}
+
+function createNewSheet() {
+    const now = new Date(Date.now());
+    let newSheetname = "" + (now.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })
+    newSheetname += "-" + (now.getDate()).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })
+    newSheetname += " " + (now.getHours()).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }) + ":" + (now.getMinutes()).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }) + ":" + (now.getSeconds()).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
+    const sheets = google.sheets({ version: 'v4', auth: oAuth2Client });
+    sheets.spreadsheets.create({
+        resource: {
+            properties: {
+                title: newSheetname
+            }
+        }
+    })
+        .then((response) => {
+            console.log("id:" + response.data.spreadsheetId)
+            currentSpreadsheetId = response.data.spreadsheetId
+            const values = [
+                [
+                    "Time", "Voltage"
+                ]
+            ]
+            const body = {
+                values: values
+            }
+            sheets.spreadsheets.values.update({
+                spreadsheetId: response.data.spreadsheetId,
+                range: 'A1:B1',
+                valueInputOption: "USER_ENTERED",
+                resource: body
+            }).then((response) => {
+                console.log(response);
+            })
+                .catch((err) => {
+                    console.log(err)
+                })
+        })
+        .catch((error) => {
+            console.log(error)
+        })
+
 }
 
 // setValue();
@@ -137,6 +206,8 @@ var wsServer = new WebSocketServer({
 
 wsServer.on('connect', function (connection) {
     console.log("connected")
+    startTime = Date.now()
+    createNewSheet();
     if (debug) {
         console.log((new Date()) + ' Connection accepted' +
             ' - Protocol Version ' + connection.webSocketVersion);

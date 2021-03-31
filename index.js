@@ -93,7 +93,9 @@ function listMajors(auth) {
 
 function setValue(auth) {
   const now = new Date(Date.now());
-  const newSheetname = "" + (now.getMonth() + 1) + "-" + now.getDate() + " " + now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+  let newSheetname = "" + (now.getMonth() + 1).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })
+  newSheetname += "-" + (now.getDate()).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })
+  newSheetname += " " + (now.getHours()).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }) + ":" + (now.getMinutes()).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }) + ":" + (now.getSeconds()).toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false });
   const sheets = google.sheets({ version: 'v4', auth });
   sheets.spreadsheets.create({
     resource: {
@@ -103,11 +105,32 @@ function setValue(auth) {
     }
   })
     .then((response) => {
-      console.log(response)
+      // console.log(response)
       console.log("id:" + response.data.spreadsheetId)
+      
+      const batchUpdateRequest = { requests: [
+        {
+          "appendDimension": {
+            "sheetId": 0,
+            "dimension": "ROWS",
+            "length": 1000
+          }
+        }
+      ] };
+      sheets.spreadsheets.batchUpdate({
+        spreadsheetId: response.data.spreadsheetId,
+        resource: batchUpdateRequest,
+      }, (err, response) => {
+        if (err) {
+          // Handle error
+          console.log(err);
+        } else {
+          console.log(response)
+        }
+      });
     })
     .catch((error) => {
-      console.error(error)
+      console.log(error)
     })
   // const values = [
   //   [
