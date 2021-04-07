@@ -244,6 +244,7 @@ wsServer.on('connect', function (connection) {
         }
     });
     connection.on('close', function (reasonCode, description) {
+        pingCount = 0
         console.log("closed connectoin with reason", reasonCode, description)
     });
 });
