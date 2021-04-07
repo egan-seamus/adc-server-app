@@ -204,6 +204,10 @@ var wsServer = new WebSocketServer({
     disableNagleAlgorithm: false
 });
 
+wsServer.on('request', function(request) {
+    console.log("request received")
+})
+
 wsServer.on('connect', function (connection) {
     console.log("connected")
     startTime = Date.now()
@@ -221,6 +225,7 @@ wsServer.on('connect', function (connection) {
             }, 100);
         }
     }
+
     connection.on('message', function (message) {
         pingCount++
         // console.log(message)
