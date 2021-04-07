@@ -73,7 +73,7 @@ function setValue() {
 }
 
 function writeNextValue() {
-    console.log(pingCount)
+    // console.log(pingCount)
     if (pingCount % 1002 !== 0) {
         const now = Date.now();
         const elapsedTime = now - startTime;
